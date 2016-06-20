@@ -6,16 +6,17 @@ import org.json.JSONObject;
 public class Employee {
     private int id;
     private String name;
-    private String account;
-    private String password;
+    private String wechat;
+    private String email;
 
     public Employee() {
     }
 
-    public Employee(String name, String account, String password) {
+    public Employee(int id, String name, String wechat, String email) {
+        this.id = id;
         this.name = name;
-        this.account = account;
-        this.password = password;
+        this.wechat = wechat;
+        this.email = email;
     }
 
     public int getId() {
@@ -26,12 +27,12 @@ public class Employee {
         this.id = id;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEmail() {
+        return email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getName() {
@@ -42,12 +43,12 @@ public class Employee {
         this.name = name;
     }
 
-    public String getAccount() {
-        return account;
+    public String getWechat() {
+        return wechat;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setWechat(String wechat) {
+        this.wechat = wechat;
     }
 
     public JSONObject toJSONObject() {
@@ -55,8 +56,8 @@ public class Employee {
         try {
             user.put("id", id);
             user.put("name", name);
-            user.put("account", account);
-            user.put("password", password);
+            user.put("wechat", wechat);
+            user.put("email", email);
         } catch (JSONException e) {
             e.printStackTrace();
         }

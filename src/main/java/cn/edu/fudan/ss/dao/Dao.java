@@ -1,5 +1,6 @@
 package cn.edu.fudan.ss.dao;
 
+import cn.edu.fudan.ss.bean.Employee;
 import cn.edu.fudan.ss.bean.MeetingEmployee;
 
 import java.sql.*;
@@ -75,5 +76,19 @@ public class Dao {
         connection.close();
         results.close();
         return 0;
+    }
+
+    public static Employee findEmployee(String sql) throws SQLException {
+        Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
+        Statement statement = connection.createStatement();
+        ResultSet results = statement.executeQuery(sql);
+        if (results.next()) {
+            return new Employee(results.getInt("id"), results.getString("name"),
+                    results.getString("wechat"), results.getString("email"));
+        }
+        statement.close();
+        connection.close();
+        results.close();
+        return null;
     }
 }

@@ -1,8 +1,12 @@
 package cn.edu.fudan.ss.controller;
 
+import cn.edu.fudan.ss.bean.Employee;
 import cn.edu.fudan.ss.bean.Meeting;
 import cn.edu.fudan.ss.bean.MeetingEmployee;
 import cn.edu.fudan.ss.dao.Dao;
+import cn.edu.fudan.ss.notification.Notify;
+import cn.edu.fudan.ss.notification.impl.EmailNotification;
+import cn.edu.fudan.ss.notification.impl.WechatNotification;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,21 +31,30 @@ import java.util.List;
 @Path("meeting")
 public class MeetingController {
 
-    private final static int TOTAL_ROOMS = 1 << 10;
+    private final static int TOTAL_ROOMS = 1 << 8;
+    private final static int TOTAL_MEETINGS = 1 << 8;
+
+    private final static Notify emailNotification;
+    private final static Notify wechatNotification;
+
+    static {
+        emailNotification = new EmailNotification();
+        wechatNotification = new WechatNotification();
+    }
 
     @GET
     @Path("/create")
     @Produces({MediaType.APPLICATION_JSON})
     public String create(@Context HttpServletRequest httpServletRequest,
                          @QueryParam("sponsor") String sponsor,
-                         @QueryParam("subject") String title,
-                         @QueryParam("names") String employeeList,
+                         @QueryParam("title") String title,
+                         @QueryParam("employees") String employeeList,
                          @QueryParam("attend") String attend,
-                         @QueryParam("date") String startTime,
+                         @QueryParam("start") String startTime,
                          @QueryParam("content") String content,
-                         @QueryParam("time") int duration) throws JSONException, ParseException, SQLException {
-        Date date = new Date(new SimpleDateFormat("MM-dd-yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
-        Time time = new Time(new SimpleDateFormat("MM-dd-yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
+                         @QueryParam("duration") int duration) throws JSONException, ParseException, SQLException {
+        Date date = new Date(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
+        Time time = new Time(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
         String[] employees = employeeList.split(",");
         String[] attends = attend.split(",");
         boolean[] mustAttend = new boolean[employees.length];
@@ -53,7 +66,7 @@ public class MeetingController {
             }
         }
         int n = mustAttend.length;
-        int m = 20;
+        int m = TOTAL_MEETINGS;
         int timeLine[][][] = new int[n][m][2];
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++) {
@@ -79,13 +92,13 @@ public class MeetingController {
                     Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
                             duration, employees);
                     meeting.insert();
+                    notifyEmployee(employees);
                     response.put("status", "0");
                     response.put("meeting", meeting.toJSONObject());
                     return response.toString();
                 }
             }
         }
-        System.out.println("Here");
         int k = 0;
         List<Meeting> availableMeetings = new ArrayList<Meeting>();
         for (int i = 10; ;i += 10) {
@@ -180,5 +193,22 @@ public class MeetingController {
         return new Date(calendar.getTime().getTime());
     }
 
+    public void notifyEmployee(final String[] employees) {
+        new Thread(new Runnable() {
+            public void run() {
+                for (int k = 0; k < employees.length; k++) {
+                    String sqlQuery = "select * from employee where name='" + employees[k] + "'";
+                    Employee employee;
+                    try {
+                        employee = Dao.findEmployee(sqlQuery);
+                        emailNotification.notify(employee);
+                        wechatNotification.notify(employee);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
 
+                }
+            }
+        }).start();
+    }
 }
