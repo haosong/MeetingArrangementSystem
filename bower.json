@@ -1,0 +1,23 @@
+{
+  "name": "SELab3",
+  "version": "1.0.0",
+  "description": "SE Lab 3",
+  "main": "index.html",
+  "moduleType": [],
+  "authors": [
+    "Song Hao"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "font-awesome": "~4.4.0",
+    "angular": "~1.4.7",
+    "angular-loader": "~1.4.0",
+    "angular-route": "^1.5.0",
+    "angular-ui-router": "^0.2.18",
+    "angular-resource": "^1.5.5",
+    "html5-boilerplate": "~5.2.0",
+    "jquery": "^2.2.3",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.37"
+  }
+}

@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <ul class="breadcrumb">
+                <li><a href="index.html">Home</a></li>
+                <li class="active">Material</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row row-content" ng-controller="BookController">
+        <div class="col-xs-12">
+            <button ng-click="toggleDetails()" class="btn btn-primary pull-right" type="button">
+                {{showDetails ? 'Hide Details':'Show Details'}}
+            </button>
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" ng-class="{active:isSelected(1)}">
+                    <a ng-click="select(1)" aria-controls="all menu" role="tab">All</a></li>
+                <li role="presentation" ng-class="{active:isSelected(2)}">
+                    <a ng-click="select(2)" aria-controls="xml" role="tab">XML</a></li>
+                <li role="presentation" ng-class="{active:isSelected(3)}">
+                    <a ng-click="select(3)" aria-controls="javaee" role="tab">Java EE</a></li>
+                <li role="presentation" ng-class="{active:isSelected(4)}">
+                    <a ng-click="select(4)" aria-controls="web3d" role="tab">Web 3D</a></li>
+                <li role="presentation" ng-class="{active:isSelected(5)}">
+                    <a ng-click="select(5)" aria-controls="hybrid" role="tab">Hybrid</a></li>
+            </ul>
+            <div class="tab-content">
+                <ul class="media-list tab-pane fade in active">
+                    <li class="media" ng-repeat="book in books | filter:filtText">
+                        <div class="media-left media-middle">
+                            <a ui-sref="app.bookdetails({id: book.id})">
+                                <img class="media-object img-thumbnail" ng-src={{book.image}} style="width: 100px">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h2 class="media-heading">{{book.name}}
+                                <span class="label label-danger">{{book.label}}</span>
+                                <span class="badge">{{book.price | currency}}</span>
+                            </h2>
+                            <p ng-show="showDetails">{{book.description}}</p>
+                            <!--<p>Comment: {{book.comment}}</p>-->
+                            <!--<p>Type your comment:-->
+                            <!--<input type="text" ng-model="book.comment"></p>-->
+                        </div>
+                        <hr>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
