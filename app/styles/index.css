@@ -100,13 +100,3 @@ body {
   position: absolute;
   right: 0px;
 }
-.footer {
-  position: relative;
-  margin-top: -50px;
-  height:50px;
-  clear:both;
-  width: 100%;
-}
-.content {
-  padding-bottom: 50px;
-}
