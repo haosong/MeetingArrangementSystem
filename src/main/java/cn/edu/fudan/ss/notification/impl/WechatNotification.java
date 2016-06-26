@@ -9,7 +9,7 @@ import java.sql.Date;
 public class WechatNotification implements Notify {
     private int leadTime = 60;
 
-    private String flag = "Wechat net notified.";
+    private String flag = "Wechat not notified.";
 
     public String getFlag(){
         return flag;
