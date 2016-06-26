@@ -41,20 +41,38 @@ angular.module('SELab3')
             $scope.isRecommend = false;
             $scope.isNetworkError = false;
             var date = moment($('#datetimepicker4').val()).format("MM/DD/YYYY HH:mm");
-            var names = "";
-            var attend = "";
+
+            var isNameDuplicate = false;
             for (var index in $scope.choices) {
-                names = names + $scope.choices[index].name + ",";
-                attend = attend + $scope.choices[index].attend + ",";
+                for (var i = parseInt(index) + 1; i < $scope.choices.length; i++) {
+                    //console.log("----");
+                    //console.log(index);
+                    //console.log(i);
+                    if ($scope.choices[index].name === $scope.choices[i].name) {
+                        console.log("duplicate!");
+                        isNameDuplicate = true;
+                    }
+                }
             }
-            console.log('subject: ' + $scope.subject);
-            console.log('date: ' + date);
-            console.log('time: ' + $scope.time);
-            console.log('sponsor: ' + $scope.sponsor);
-            console.log('names: ' + names);
-            console.log('attend: ' + attend);
-            console.log('content: ' + $scope.content);
-            $http.get('/rest/meeting/create', {
+            if (isNameDuplicate) {
+                alert("参会人员重复！");
+            } else if ($scope.time <= 0) {
+                alert("会议时长需大于零！")
+            } else {
+                var names = "";
+                var attend = "";
+                for (var index in $scope.choices) {
+                    names = names + $scope.choices[index].name + ",";
+                    attend = attend + $scope.choices[index].attend + ",";
+                }
+                console.log('subject: ' + $scope.subject);
+                console.log('date: ' + date);
+                console.log('time: ' + $scope.time);
+                console.log('sponsor: ' + $scope.sponsor);
+                console.log('names: ' + names);
+                console.log('attend: ' + attend);
+                console.log('content: ' + $scope.content);
+                $http.get('/rest/meeting/create', {
                     params: {
                         subject: $scope.subject,
                         date: date,
@@ -65,22 +83,23 @@ angular.module('SELab3')
                         content: $scope.content
                     }
                 })
-                .success(function (response) {
-                    console.log("success");
-                    if (response.status == -1) {
-                        // 推荐会议
-                        $scope.failResponse = response;
-                        $scope.isRecommend = true;
-                    } else {
-                        // 会议安排成功
-                        $scope.isSuccess = true;
-                    }
-                })
-                .error(function (response) {
-                    // 网络错误
-                    console.log("error");
-                    $scope.isNetworkError = true;
-                });
+                    .success(function (response) {
+                        console.log("success");
+                        if (response.status == -1) {
+                            // 推荐会议
+                            $scope.failResponse = response;
+                            $scope.isRecommend = true;
+                        } else {
+                            // 会议安排成功
+                            $scope.isSuccess = true;
+                        }
+                    })
+                    .error(function (response) {
+                        // 网络错误
+                        console.log("error");
+                        $scope.isNetworkError = true;
+                    });
+            }
         };
 
         $scope.select = function () {
