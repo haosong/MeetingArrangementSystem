@@ -8,6 +8,17 @@
         </div>
     </div>
     <div class="row">
+        <div ng-if="isNetworkError" class="alert alert-danger col-sm-6 col-sm-offset-2" role="alert">
+            <a href="#" class="alert-link">网络错误，请稍后重试！</a>
+        </div>
+        <div ng-if="isSuccess" class="alert alert-success col-sm-6 col-sm-offset-2" role="alert">
+            <a href="#" class="alert-link">会议安排成功！</a>
+        </div>
+        <div ng-if="isRecommend" class="alert alert-warning col-sm-6 col-sm-offset-2" role="alert">
+            <a href="#" class="alert-link">会议时间冲突，请选择一个推荐的会议时间！</a>
+        </div>
+    </div>
+    <div class="row">
         <form class="form-horizontal">
             <div class="form-group">
                 <label for="inputPassword3" class="col-sm-2 control-label">会议主题 :</label>
@@ -16,7 +27,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="inputPassword3" class="col-sm-2 control-label">会议时间 :</label>
+                <label for="datetimepicker4" class="col-sm-2 control-label">会议时间 :</label>
                 <div class="col-sm-6">
                     <div class="input-group">
                         <input type='text' class="form-control" id='datetimepicker4' ng-model="meetingDate"
@@ -75,8 +86,26 @@
                     <button type="submit" class="btn btn-primary" ng-click="confirm()">Confirm</button>
                 </div>
             </div>
-        </form>
 
+            <div ng-if="isRecommend">
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">推荐时间 :</label>
+                    <div class="col-sm-offset-2" style="padding-left: 20px">
+                        <div ng-repeat="temp in failResponse.available" class="col-sm-8" ng-init="radioIndex = $index">
+                            <label class="radio">
+                                <input type="radio" ng-model="meetingRadio.value" name="optionsRadios" value="{{radioIndex}}">
+                                {{temp.start}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary" ng-click="select()">Select</button>
+                    </div>
+                </div>
+            </div>
+        </form>
 
         <div id="choicesDisplay">
             {{ choices }}
@@ -84,5 +113,13 @@
         <div>
             <p>{{ meetingDate }}</p>
         </div>
+        <div>
+            <p>meetingRadio</p>
+            <p>{{ meetingRadio.value }}</p>
+            <p>{{ meetingRadio.value.duration }}</p>
+            <p>{{ meetingRadio.value.start }}</p>
+            <p>{{ meetingRadio.value.id }}</p>
+        </div>
+
     </div>
 </div>

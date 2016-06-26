@@ -95,6 +95,7 @@ angular.module('SELab3')
                     date: selectedMeeting.start,
                     time: selectedMeeting.duration,
                     names: selectedMeeting.names,
+                    sponsor: selectedMeeting.sponsor,
                     attend: selectedMeeting.attend,
                     content: selectedMeeting.content
                 }
