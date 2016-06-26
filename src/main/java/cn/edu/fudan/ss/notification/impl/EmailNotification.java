@@ -21,6 +21,7 @@ public class EmailNotification implements Notify {
         System.out.println("@room_" + meeting.getRoomId());
         System.out.println("date: " + new Date(meeting.getStart().getTime()));
         System.out.println("duration: " + meeting.getDuration());
+        System.out.println(" ======= ");
         flag = "Email notified.";
     }
 }

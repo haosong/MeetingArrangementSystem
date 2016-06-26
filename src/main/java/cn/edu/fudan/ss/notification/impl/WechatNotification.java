@@ -16,12 +16,13 @@ public class WechatNotification implements Notify {
     }
 
     public void notify(Employee employee, Meeting meeting, String attend) {
-        System.out.println("Email Notify: to " + employee.getName() + " " + employee.getWechat());
+        System.out.println("Wechat Notify: to " + employee.getName() + " " + employee.getWechat());
         System.out.println("level: " + attend);
         System.out.println("@room_" + meeting.getRoomId());
         System.out.println("date: " + new Date(meeting.getStart().getTime()));
         System.out.println("duration: " + meeting.getDuration());
         System.out.println("notified before: " + leadTime + "minutes");
+        System.out.println(" ======= ");
         flag = "Wechat notified.";
     }
 }
