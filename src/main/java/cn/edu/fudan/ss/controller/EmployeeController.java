@@ -33,28 +33,30 @@ public class EmployeeController {
         if (userMap.containsKey(account)) {
             response.put("status", "用户名重复");
         } else {
-            userMap.put(account, new Employee(name, account, password));
+            //userMap.put(account, new Employee(name, account, password));
             response.put("status", "注册成功");
         }
         return response.toString();
     }
 
-//    @GET
-//    @Path("/login")
-//    @Produces({MediaType.APPLICATION_JSON})
-//    public String login(@Context HttpServletRequest httpServletRequest,
-//             @QueryParam("account") String account,
-//             @QueryParam("password") String password) throws JSONException {
-//        JSONObject response = new JSONObject();
-//        if (userMap.containsKey(account)
-//                && userMap.get(account).getPassword().equals(password)) {
-//            response.put("status", "登录成功");
-//            response.put("user", userMap.get(account).toJSONObject());
-//        } else {
-//            response.put("status", "用户名或密码错误");
-//        }
-//        return response.toString();
-//    }
+    @GET
+    @Path("/login")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String login(@Context HttpServletRequest httpServletRequest,
+             @QueryParam("account") String account,
+             @QueryParam("password") String password) throws JSONException {
+        JSONObject response = new JSONObject();
+        /*
+        if (userMap.containsKey(account)
+                && userMap.get(account).getPassword().equals(password)) {
+            response.put("status", "登录成功");
+            response.put("user", userMap.get(account).toJSONObject());
+        } else {
+            response.put("status", "用户名或密码错误");
+        }
+        */
+        return response.toString();
+    }
 
     @GET
     @Path("/list")

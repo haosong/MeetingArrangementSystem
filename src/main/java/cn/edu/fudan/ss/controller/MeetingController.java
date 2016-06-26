@@ -42,6 +42,14 @@ public class MeetingController {
         wechatNotification = new WechatNotification();
     }
 
+    public Notify getEmailNotification(){
+        return emailNotification;
+    }
+
+    public Notify getWechatNotification(){
+        return wechatNotification;
+    }
+
     @GET
     @Path("/create")
     @Produces({MediaType.APPLICATION_JSON})
@@ -53,10 +61,9 @@ public class MeetingController {
                          @QueryParam("date") String startTime,
                          @QueryParam("content") String content,
                          @QueryParam("time") int duration) throws JSONException, ParseException, SQLException {
-        System.out.println("....."+startTime);
         Date date = new Date(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
         Time time = new Time(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
-        String[] employees = employeeList.split(",");
+        final String[] employees = employeeList.split(",");
         String[] attends = attend.split(",");
         boolean[] mustAttend = new boolean[employees.length];
         for (int i = 0; i < attends.length; i++) {
@@ -66,6 +73,9 @@ public class MeetingController {
                 mustAttend[i] = false;
             }
         }
+
+        //System.out.println(employees.length);
+
         int n = mustAttend.length;
         int m = TOTAL_MEETINGS;
         int timeLine[][][] = new int[n][m][2];
@@ -77,7 +87,7 @@ public class MeetingController {
         for (int i = 0; i < n; i++) {
             if (!mustAttend[i])
                 continue;
-            String sql = "select * from meeting_employee where employee='" + employees[i] + "'";
+            String sql = "select * from meeting_employee where employee='" + employees[i] + "' and attend='1'";
             List<MeetingEmployee> meetingEmployees = Dao.queryMeetingEmployee(sql);
             for (int j = 0; j < meetingEmployees.size(); j++) {
                 timeLine[i][j][0] = meetingEmployees.get(j).start;
@@ -88,14 +98,18 @@ public class MeetingController {
         int end = getTime(date) + duration;
         JSONObject response = new JSONObject();
         if (checkEmployeeAvailable(timeLine, n, m, start, end)) {
-            for (int i = 0; i < TOTAL_ROOMS; i++) {
+            for (int i = 1; i < TOTAL_ROOMS; i++) {
                 if (checkRoomAvailable(i, start, end)) {
-                    Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
-                            duration, employees);
+                    final Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
+                            duration, employees, mustAttend);
                     meeting.setAttend(attend);
                     meeting.setEmployeeList(employeeList);
                     meeting.insert();
-                    notifyEmployee(employees);
+                    new Thread(new Runnable() {
+                        public void run() {
+                            notifyEmployee(employees, meeting);
+                        }
+                    }).start();
                     response.put("status", "0");
                     response.put("meeting", meeting.toJSONObject());
                     return response.toString();
@@ -122,7 +136,7 @@ public class MeetingController {
                 for (int j = 0; j < TOTAL_ROOMS; j++) {
                     if (checkRoomAvailable(j, start + i, end + i)) {
                         Meeting meeting = new Meeting(title, j, sponsor, content, new Timestamp(tmpTime.getTime()),
-                                duration, employees);
+                                duration, employees, mustAttend);
                         meeting.setAttend(attend);
                         meeting.setEmployeeList(employeeList);
                         availableMeetings.add(meeting);
@@ -144,24 +158,15 @@ public class MeetingController {
         return response.toString();
     }
 
-    @GET
-    @Path("/list")
-    @Produces({MediaType.APPLICATION_JSON})
-    public String list(@Context HttpServletRequest httpServletRequest) throws JSONException {
-        JSONObject response = new JSONObject();
-
-        return response.toString();
-    }
-
-    private boolean checkRoomAvailable(int roomId, int start, int end) throws SQLException {
-        String sqlQuery = "select * from meeting_room where roomId='" + roomId + "' and ((start<'" + start
-                + "' and end>'" + start + "') or (start<'" + end + "' and start>'" + start + "'))";
+    public boolean checkRoomAvailable(int roomId, int start, int end) throws SQLException {
+        String sqlQuery = "select * from meeting_room where roomId='" + roomId + "' and ((start <='" + start
+                + "' and end>='" + start + "') or (start<='" + end + "' and start>='" + start + "'))";
         if (Dao.queryRecordsCount(sqlQuery) > 0)
             return false;
         return true;
     }
 
-    private boolean checkEmployeeAvailable(int[][][] timeLine, int n, int m, int start, int end) {
+    public boolean checkEmployeeAvailable(int[][][] timeLine, int n, int m, int start, int end) {
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++) {
                 if (timeLine[i][j][0] < 0)
@@ -173,47 +178,32 @@ public class MeetingController {
         return true;
     }
 
-    private boolean checkTimeAvailable(int x1, int y1, int x2, int y2) {
+    public boolean checkTimeAvailable(int x1, int y1, int x2, int y2) {
         if ((x1 > y2) || (y1 < x2))
             return true;
         return false;
     }
 
-    private int getTime(Timestamp timestamp) {
-        return (int) (timestamp.getTime() / 1000L / 60L);
-    }
-
-    private int getTime(Time time) {
+    public int getTime(Time time) {
         return (int) (time.getTime() / 1000L / 60L);
     }
 
-    private int getTime(Date date) {
+    public int getTime(Date date) {
         return (int) (date.getTime() / 1000L / 60L);
     }
 
-    private Date getTomorrow(Date tody) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(tody);
-        calendar.add(calendar.DATE, 1);
-        return new Date(calendar.getTime().getTime());
-    }
-
-    public void notifyEmployee(final String[] employees) {
-        new Thread(new Runnable() {
-            public void run() {
-                for (int k = 0; k < employees.length; k++) {
-                    String sqlQuery = "select * from employee where name='" + employees[k] + "'";
-                    Employee employee;
-                    try {
-                        employee = Dao.findEmployee(sqlQuery);
-                        emailNotification.notify(employee);
-                        wechatNotification.notify(employee);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
-                }
+    public void notifyEmployee(final String[] employees, final Meeting meeting) {
+        for (int k = 0; k < employees.length; k++) {
+            String sqlQuery = "select * from employee where name='" + employees[k] + "'";
+            Employee employee;
+            try {
+                employee = Dao.findEmployee(sqlQuery);
+                emailNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
+                wechatNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        }).start();
+        }
+//        System.out.println(emailNotification.getFlag());
     }
 }

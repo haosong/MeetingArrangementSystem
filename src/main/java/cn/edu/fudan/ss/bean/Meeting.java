@@ -17,6 +17,8 @@ public class Meeting {
     private Timestamp start;
     private int duration;
     private String[] employees;
+    private int[] mustAttend;
+
     private String employeeList;
     private String attend;
 
@@ -26,7 +28,7 @@ public class Meeting {
     public Meeting(String title, int roomId,
                    String sponsor, String content,
                    Timestamp start, int duration,
-                   String[] employees) {
+                   String[] employees, boolean[] mustAttend) {
         this.title = title;
         this.roomId = roomId;
         this.sponsor = sponsor;
@@ -34,6 +36,14 @@ public class Meeting {
         this.duration = duration;
         this.employees = employees;
         this.content = content;
+        this.mustAttend = new int[mustAttend.length];
+        for (int i = 0; i < mustAttend.length; i++) {
+            if (mustAttend[i]) {
+                this.mustAttend[i] = 1;
+            } else {
+                this.mustAttend[i] = 0;
+            }
+        }
     }
 
     public String getEmployeeList() {
@@ -50,6 +60,78 @@ public class Meeting {
 
     public void setAttend(String attend) {
         this.attend = attend;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getSponsor() {
+        return sponsor;
+    }
+
+    public void setSponsor(String sponsor) {
+        this.sponsor = sponsor;
+    }
+
+    public Timestamp getStart() {
+        return start;
+    }
+
+    public void setStart(Timestamp start) {
+        this.start = start;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public String[] getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(String[] employees) {
+        this.employees = employees;
+    }
+
+    public String getEmployeeLevel(int i) {
+        if (mustAttend[i] != 0) {
+            return "must attend";
+        } else {
+            return "nice to attend";
+        }
     }
 
     public JSONObject toJSONObject() {
@@ -77,10 +159,10 @@ public class Meeting {
         Dao.insert(sqlInsert);
         String sqlQuery = "select * from meeting where title='" + title + "' and (start between '" + start + "' and '" + start + "')";
         id = Dao.findMeetingId(sqlQuery);
-        for (String employee: employees) {
-            sqlInsert = "insert into meeting_employee(employee, start, end, meetingId) " +
-                    "values('" + employee + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
-                     + (((int) (start.getTime() / 60000L)) + duration) + "', '" + id + "')";
+        for (int i = 0; i < employees.length; i++) {
+            sqlInsert = "insert into meeting_employee(employee, start, end, meetingId, attend) " +
+                    "values('" + employees[i] + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
+                     + (((int) (start.getTime() / 60000L)) + duration) + "', '" + id + "', '" + mustAttend[i] + "')";
             Dao.insert(sqlInsert);
         }
         sqlInsert = "insert into meeting_room(roomId, start, end, meetingId) " +

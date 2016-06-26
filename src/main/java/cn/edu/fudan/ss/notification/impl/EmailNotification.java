@@ -1,10 +1,26 @@
 package cn.edu.fudan.ss.notification.impl;
 
 import cn.edu.fudan.ss.bean.Employee;
+import cn.edu.fudan.ss.bean.Meeting;
 import cn.edu.fudan.ss.notification.Notify;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 public class EmailNotification implements Notify {
-    public void notify(Employee employee) {
-        System.out.println("Email Notify: " + employee.getName() + "(" + employee.getEmail() + ")");
+
+    private String flag = "Email not notified.";
+
+    public String getFlag(){
+        return flag;
+    }
+
+    public void notify(Employee employee, Meeting meeting, String attend) {
+        System.out.println("Email Notify: to " + employee.getName() + " " + employee.getEmail());
+        System.out.println("level: " + attend);
+        System.out.println("@room_" + meeting.getRoomId());
+        System.out.println("date: " + new Date(meeting.getStart().getTime()));
+        System.out.println("duration: " + meeting.getDuration());
+        flag = "Email notified.";
     }
 }

@@ -12,9 +12,6 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(String name, String wechat, String email) {
-    }
-
     public Employee(int id, String name, String wechat, String email) {
         this.id = id;
         this.name = name;

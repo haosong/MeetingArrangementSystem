@@ -102,6 +102,7 @@ angular.module('SELab3')
             }
         };
 
+        //Choose one from all the recommended meetings.
         $scope.select = function () {
             var index = $scope.meetingRadio.value;
             var selectedMeeting = $scope.failResponse.available[index];
