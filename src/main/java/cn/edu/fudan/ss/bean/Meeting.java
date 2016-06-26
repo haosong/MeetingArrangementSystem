@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 public class Meeting {
     private int id;
@@ -16,6 +17,8 @@ public class Meeting {
     private Timestamp start;
     private int duration;
     private String[] employees;
+    private String employeeList;
+    private String attend;
 
     public Meeting() {
     }
@@ -33,6 +36,22 @@ public class Meeting {
         this.content = content;
     }
 
+    public String getEmployeeList() {
+        return employeeList;
+    }
+
+    public void setEmployeeList(String employeeList) {
+        this.employeeList = employeeList;
+    }
+
+    public String getAttend() {
+        return attend;
+    }
+
+    public void setAttend(String attend) {
+        this.attend = attend;
+    }
+
     public JSONObject toJSONObject() {
         JSONObject meeting = new JSONObject();
         try {
@@ -40,13 +59,10 @@ public class Meeting {
             meeting.put("title", title);
             meeting.put("roomId", roomId);
             meeting.put("sponsor", sponsor);
-            meeting.put("start", start);
+            meeting.put("start", new SimpleDateFormat("MM/dd/yyyy HH:mm").format(start));
             meeting.put("duration", duration);
-            JSONArray employeeArray = new JSONArray();
-            for (String employee: employees) {
-                employeeArray.put(employee);
-            }
-            meeting.put("employees", employeeArray);
+            meeting.put("names", employeeList);
+            meeting.put("attend", attend);
             meeting.put("content", content);
         } catch (JSONException e) {
             e.printStackTrace();

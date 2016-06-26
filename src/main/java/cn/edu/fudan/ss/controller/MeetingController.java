@@ -47,12 +47,13 @@ public class MeetingController {
     @Produces({MediaType.APPLICATION_JSON})
     public String create(@Context HttpServletRequest httpServletRequest,
                          @QueryParam("sponsor") String sponsor,
-                         @QueryParam("title") String title,
-                         @QueryParam("employees") String employeeList,
+                         @QueryParam("subject") String title,
+                         @QueryParam("names") String employeeList,
                          @QueryParam("attend") String attend,
-                         @QueryParam("start") String startTime,
+                         @QueryParam("date") String startTime,
                          @QueryParam("content") String content,
-                         @QueryParam("duration") int duration) throws JSONException, ParseException, SQLException {
+                         @QueryParam("time") int duration) throws JSONException, ParseException, SQLException {
+        System.out.println("....."+startTime);
         Date date = new Date(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
         Time time = new Time(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
         String[] employees = employeeList.split(",");
@@ -91,6 +92,8 @@ public class MeetingController {
                 if (checkRoomAvailable(i, start, end)) {
                     Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
                             duration, employees);
+                    meeting.setAttend(attend);
+                    meeting.setEmployeeList(employeeList);
                     meeting.insert();
                     notifyEmployee(employees);
                     response.put("status", "0");
@@ -120,6 +123,8 @@ public class MeetingController {
                     if (checkRoomAvailable(j, start + i, end + i)) {
                         Meeting meeting = new Meeting(title, j, sponsor, content, new Timestamp(tmpTime.getTime()),
                                 duration, employees);
+                        meeting.setAttend(attend);
+                        meeting.setEmployeeList(employeeList);
                         availableMeetings.add(meeting);
                         i = i + duration - (i + duration) % 10;
                         break;

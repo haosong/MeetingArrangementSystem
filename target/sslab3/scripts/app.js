@@ -1,9 +1,8 @@
 'use strict';
 
-var app = angular.module('adWebHW', ['ui.router','ui.bootstrap', 'ngResource'])
+var app = angular.module('SELab3', ['ui.router', 'ui.bootstrap', 'ngResource'])
     .config(function ($stateProvider, $urlRouterProvider) {
         $stateProvider
-        // route for the home page
             .state('app', {
                 url: '/',
                 views: {
@@ -15,50 +14,11 @@ var app = angular.module('adWebHW', ['ui.router','ui.bootstrap', 'ngResource'])
                     }
                 }
             })
-            // route for the about page
             .state('app.home', {
                 url: 'home',
                 views: {
                     'content@': {
                         templateUrl: 'views/home.html'
-                    }
-                }
-            })
-            .state('app.about', {
-                url: 'about',
-                views: {
-                    'content@': {
-                        templateUrl: 'views/about.html'
-                    }
-                }
-            })
-            // route for the contact page
-            .state('app.contact', {
-                url: 'contact',
-                views: {
-                    'content@': {
-                        templateUrl: 'views/contact.html',
-                        controller: 'ContactController'
-                    }
-                }
-            })
-            // route for the book page
-            .state('app.book', {
-                url: 'book',
-                views: {
-                    'content@': {
-                        templateUrl: 'views/book.html',
-                        controller: 'BookController'
-                    }
-                }
-            })
-            // route for the bookdetail page
-            .state('app.bookdetails', {
-                url: 'book/:id',
-                views: {
-                    'content@': {
-                        templateUrl: 'views/bookdetail.html',
-                        controller: 'BookDetailController'
                     }
                 }
             })
@@ -89,16 +49,15 @@ var app = angular.module('adWebHW', ['ui.router','ui.bootstrap', 'ngResource'])
                     }
                 }
             })
-            ;
-
+        ;
         $urlRouterProvider.otherwise('login');
     });
 
-    app.filter('capitalize', function() {
-        return function(input, scope) {
-            if (input!=null)
-                input = input.toLowerCase();
-            return input.substring(0,1).toUpperCase()+input.substring(1);
-        }
-    });
+app.filter('capitalize', function () {
+    return function (input, scope) {
+        if (input != null)
+            input = input.toLowerCase();
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+});
 ;

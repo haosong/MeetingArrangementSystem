@@ -30,7 +30,8 @@ angular.module('SELab3')
                 "content": "hhh"
             }, "status": "0"
         };
-        $scope.failResponse = {
+        $scope.failResponse = '';
+        /*{
             "available": [{
                 "duration": 30,
                 "sponsor": "a",
@@ -86,7 +87,7 @@ angular.module('SELab3')
                 "roomId": 0,
                 "content": "hhh"
             }], "status": "-1"
-        };
+        };*/
 
         $scope.addNewChoice = function () {
             var newItemNo = $scope.choices.length + 1;
@@ -101,7 +102,7 @@ angular.module('SELab3')
         };
 
         $scope.confirm = function () {
-            var date = moment($('#datetimepicker4').val()).format("MM-DD-YYYY HH:mm");
+            var date = moment($('#datetimepicker4').val()).format("MM/DD/YYYY HH:mm");
             var names = "";
             var attend = "";
             for (var index in $scope.choices) {
@@ -128,8 +129,9 @@ angular.module('SELab3')
                 .success(function (response) {
                     console.log(response);
                     console.log("success");
-                    response.status = -1;
-                    if (response.status = -1) {
+                    //response.status = -1;
+                    if (response.status == -1) {
+                        $scope.failResponse = response;
                         $scope.isRecommend = true;
                     } else {
 
