@@ -45,7 +45,8 @@ public class Meeting implements Observer{
         this.duration = duration;
         this.employees = employees;
         size = employees.length;
-        ((EmployeeIterator)iterator).currentIndex = 0;
+        if (iterator != null)
+            ((EmployeeIterator)iterator).currentIndex = 0;
         this.content = content;
         this.mustAttend = new int[mustAttend.length];
         for (int i = 0; i < mustAttend.length; i++) {
@@ -136,7 +137,8 @@ public class Meeting implements Observer{
     public void setEmployees(String[] employees) {
         this.employees = employees;
         size = employees.length;
-        ((EmployeeIterator)iterator).currentIndex = 0;
+        if (iterator != null)
+            ((EmployeeIterator)iterator).currentIndex = 0;
     }
 
     public String getEmployeeLevel(int i) {
@@ -189,7 +191,8 @@ public class Meeting implements Observer{
     }
 
     public Iterator iterator(){
-        return new EmployeeIterator();
+        iterator = new EmployeeIterator();
+        return iterator;
     }
 
     private class EmployeeIterator implements Iterator{
