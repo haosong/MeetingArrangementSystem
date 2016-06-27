@@ -9,11 +9,13 @@ import java.util.List;
 
 public class Dao {
 
-    private final static String driver = "com.mysql.jdbc.Driver";
-    private final static String url = "jdbc:mysql://10.131.226.239:3306/sslab3?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false";
+    private final  String driver = "com.mysql.jdbc.Driver";
+    private final  String url = "jdbc:mysql://10.131.226.239:3306/sslab3?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false";
 
-    private final static String dbUsername = "root";
-    private final static String dbPassword = "123456";
+    private final  String dbUsername = "root";
+    private final  String dbPassword = "123456";
+    
+    private final Dao dao;
 
     static {
         try {
@@ -26,8 +28,23 @@ public class Dao {
             e.printStackTrace();
         }
     }
+    
+    private Dao(){
+        
+    }
+    
+    public static Dao getInstance(){
+        if (dao == null){
+            synchronized (Dao.class){
+                if (dao == null){
+                    dao = new Dao();
+                }
+            }
+        }
+        return dao;
+    }
 
-    public static List<MeetingEmployee> queryMeetingEmployee(String sql) throws SQLException {
+    public  List<MeetingEmployee> queryMeetingEmployee(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);
@@ -42,7 +59,7 @@ public class Dao {
         return meetingEmployees;
     }
 
-    public static int queryRecordsCount(String sql) throws SQLException {
+    public  int queryRecordsCount(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);
@@ -57,7 +74,7 @@ public class Dao {
     }
 
 
-    public static void insert(String sql) throws SQLException {
+    public  void insert(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         statement.executeUpdate(sql);
@@ -65,7 +82,7 @@ public class Dao {
         connection.close();
     }
 
-    public static int findMeetingId(String sql) throws SQLException {
+    public  int findMeetingId(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);
@@ -78,7 +95,7 @@ public class Dao {
         return 0;
     }
 
-    public static Employee findEmployee(String sql) throws SQLException {
+    public  Employee findEmployee(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);

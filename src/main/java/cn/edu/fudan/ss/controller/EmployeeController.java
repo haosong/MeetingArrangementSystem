@@ -1,6 +1,7 @@
 package cn.edu.fudan.ss.controller;
 
 import cn.edu.fudan.ss.bean.Employee;
+import cn.edu.fudan.ss.log.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,13 +14,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 @Path("employee")
 public class EmployeeController {
 
     private static Map<String, Employee> userMap;
+    private static Log log;
 
     static {
         userMap = new HashMap<String, Employee>();
+        LogFactory factory = new FileLogFactory();
+        log = factory.Create();
     }
 
     @GET

@@ -2,12 +2,14 @@ package cn.edu.fudan.ss.bean;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import cn.edu.fudan.ss.observer.*;
 
-public class Employee {
+public class Employee implements Subject{
     private int id;
     private String name;
     private String wechat;
     private String email;
+    private Vector<Observer> vector = new Vector<Observer>();
 
     public Employee() {
     }
@@ -49,6 +51,21 @@ public class Employee {
 
     public void setWechat(String wechat) {
         this.wechat = wechat;
+    }
+    
+    public void add(Observer observer) {
+        vector.add(observer);
+    }
+    
+    public void del(Observer observer) {
+        vector.remove(observer);
+    }
+    
+    public void notifyObservers() {
+        Enumeration<Observer> enumo = vector.elements();
+        while(enumo.hasMoreElements()){
+            enumo.nextElement().update();
+        }
     }
 
     public JSONObject toJSONObject() {

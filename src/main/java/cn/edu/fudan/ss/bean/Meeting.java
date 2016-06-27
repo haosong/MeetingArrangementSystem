@@ -1,4 +1,6 @@
 package cn.edu.fudan.ss.bean;
+import cn.edu.fudan.ss.iterator.*;
+import cn.edu.fudan.ss.observer.*;
 
 import cn.edu.fudan.ss.dao.Dao;
 import org.json.JSONArray;
@@ -8,7 +10,7 @@ import org.json.JSONObject;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class Meeting {
+public class Meeting implements Observer{
     private int id;
     private String title, content;
     private int roomId;
@@ -16,8 +18,12 @@ public class Meeting {
     private Timestamp start;
     private int duration;
     private String[] employees;
+    private Dao dao;
+    private Iterator iterator;
+    private int size;
 
     public Meeting() {
+        dao = Dao.getInstance();
     }
 
     public Meeting(String title, int roomId,
@@ -35,6 +41,7 @@ public class Meeting {
 
     public JSONObject toJSONObject() {
         JSONObject meeting = new JSONObject();
+        size = 0;
         try {
             meeting.put("id", id);
             meeting.put("title", title);
@@ -45,6 +52,7 @@ public class Meeting {
             JSONArray employeeArray = new JSONArray();
             for (String employee: employees) {
                 employeeArray.put(employee);
+                size++;
             }
             meeting.put("employees", employeeArray);
             meeting.put("content", content);
@@ -58,18 +66,42 @@ public class Meeting {
         String sqlInsert = "insert into meeting(title, roomId, start, duration, sponsor, content) " +
                 "values('" + title + "', '" + roomId + "', '" + start + "', '" + duration
                            + "', '" + sponsor + "', '" + content + "')";
-        Dao.insert(sqlInsert);
+        dao.insert(sqlInsert);
         String sqlQuery = "select * from meeting where title='" + title + "' and (start between '" + start + "' and '" + start + "')";
-        id = Dao.findMeetingId(sqlQuery);
+        id = dao.findMeetingId(sqlQuery);
         for (String employee: employees) {
             sqlInsert = "insert into meeting_employee(employee, start, end, meetingId) " +
                     "values('" + employee + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
                      + (((int) (start.getTime() / 60000L)) + duration) + "', '" + id + "')";
-            Dao.insert(sqlInsert);
+            dao.insert(sqlInsert);
         }
         sqlInsert = "insert into meeting_room(roomId, start, end, meetingId) " +
                 "values('" + roomId + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
                 + (((int) (start.getTime() / 60000L)) + duration) + "','" + id + "')";
-        Dao.insert(sqlInsert);
+        dao.insert(sqlInsert);
+    }
+    
+    public Iterator iterator(){
+        return new EmployeeIterator();
+    }
+    
+    public void update() {
+        System.out.println("Employee has changed");
+        // Do some action
+    }
+    
+    private class EmployeeIterator implements Iterator{
+        private int currentIndex = 0;
+        
+        public boolean hasNext() {
+            if(currentIndex >= size) return false;
+            else return true;
+        }
+        
+        public Object next() {
+            Object o = employees[currentIndex];
+            currentIndex++;
+            return o;
+        }
     }
 }
