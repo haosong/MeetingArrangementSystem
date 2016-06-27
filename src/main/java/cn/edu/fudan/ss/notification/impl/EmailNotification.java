@@ -7,7 +7,13 @@ import cn.edu.fudan.ss.notification.Notify;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class EmailNotification implements Notify {
+public class EmailNotification extends Notification {
+    private Notification notification;
+
+    public EmailNotification(Notification notification){
+        this.notification = notification;
+
+    }
 
     private String flag = "Email not notified.";
 
@@ -16,6 +22,7 @@ public class EmailNotification implements Notify {
     }
 
     public void notify(Employee employee, Meeting meeting, String attend) {
+        notification.notify(employee, meeting, attend);
         System.out.println("Email Notify: to " + employee.getName() + " " + employee.getEmail());
         System.out.println("level: " + attend);
         System.out.println("@room_" + meeting.getRoomId());

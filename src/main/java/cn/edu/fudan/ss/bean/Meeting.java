@@ -1,15 +1,16 @@
 package cn.edu.fudan.ss.bean;
 
 import cn.edu.fudan.ss.dao.Dao;
+import cn.edu.fudan.ss.iterator.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import cn.edu.fudan.ss.observer.Observer;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
-public class Meeting {
+public class Meeting implements Observer{
     private int id;
     private String title, content;
     private int roomId;
@@ -18,11 +19,19 @@ public class Meeting {
     private int duration;
     private String[] employees;
     private int[] mustAttend;
+    private Iterator iterator;
+    private int size;
 
     private String employeeList;
     private String attend;
+    private static Dao dao;
+
+    static{
+        dao = Dao.getInstance();
+    }
 
     public Meeting() {
+        size = 0;
     }
 
     public Meeting(String title, int roomId,
@@ -35,6 +44,8 @@ public class Meeting {
         this.start = start;
         this.duration = duration;
         this.employees = employees;
+        size = employees.length;
+        ((EmployeeIterator)iterator).currentIndex = 0;
         this.content = content;
         this.mustAttend = new int[mustAttend.length];
         for (int i = 0; i < mustAttend.length; i++) {
@@ -124,6 +135,8 @@ public class Meeting {
 
     public void setEmployees(String[] employees) {
         this.employees = employees;
+        size = employees.length;
+        ((EmployeeIterator)iterator).currentIndex = 0;
     }
 
     public String getEmployeeLevel(int i) {
@@ -156,18 +169,42 @@ public class Meeting {
         String sqlInsert = "insert into meeting(title, roomId, start, duration, sponsor, content) " +
                 "values('" + title + "', '" + roomId + "', '" + start + "', '" + duration
                            + "', '" + sponsor + "', '" + content + "')";
-        Dao.insert(sqlInsert);
+        dao.insert(sqlInsert);
         String sqlQuery = "select * from meeting where title='" + title + "' and (start between '" + start + "' and '" + start + "')";
-        id = Dao.findMeetingId(sqlQuery);
+        id = dao.findMeetingId(sqlQuery);
         for (int i = 0; i < employees.length; i++) {
             sqlInsert = "insert into meeting_employee(employee, start, end, meetingId, attend) " +
                     "values('" + employees[i] + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
                      + (((int) (start.getTime() / 60000L)) + duration) + "', '" + id + "', '" + mustAttend[i] + "')";
-            Dao.insert(sqlInsert);
+            dao.insert(sqlInsert);
         }
         sqlInsert = "insert into meeting_room(roomId, start, end, meetingId) " +
                 "values('" + roomId + "', '" + ((int) (start.getTime() / 60000L)) + "', '"
                 + (((int) (start.getTime() / 60000L)) + duration) + "','" + id + "')";
-        Dao.insert(sqlInsert);
+        dao.insert(sqlInsert);
     }
+
+    public void update() {
+        System.out.println("Employee has changed.");
+    }
+
+    public Iterator iterator(){
+        return new EmployeeIterator();
+    }
+
+    private class EmployeeIterator implements Iterator{
+        private int currentIndex = 0;
+
+        public boolean hasNext() {
+            if(currentIndex >= size) return false;
+            else return true;
+        }
+
+        public Object next() {
+            Object o = employees[currentIndex];
+            currentIndex++;
+            return o;
+        }
+    }
+
 }

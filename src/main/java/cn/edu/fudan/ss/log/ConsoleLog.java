@@ -8,13 +8,13 @@ import java.util.Date;
 public class ConsoleLog extends Log{
 
     @Override
-    void log(String content) {
+    public void log(String content) {
         Date date = new Date();
         log(content,date);
     }
 
     @Override
-    void log(String content, Date date) {
+    public void log(String content, Date date) {
         System.out.println(date.toString() + " : " + content);
     }
 }

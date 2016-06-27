@@ -21,13 +21,13 @@ public class FileLog extends Log{
     }
 
     @Override
-    void log(String content) {
+    public void log(String content) {
         Date date = new Date();
         log(content,date);
     }
 
     @Override
-    void log(String content, Date date) {
+    public void log(String content, Date date) {
         try {
             bw.write(date.toString() + " : " + content);
             bw.newLine();

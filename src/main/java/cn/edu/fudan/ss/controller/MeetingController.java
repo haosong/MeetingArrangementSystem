@@ -4,8 +4,11 @@ import cn.edu.fudan.ss.bean.Employee;
 import cn.edu.fudan.ss.bean.Meeting;
 import cn.edu.fudan.ss.bean.MeetingEmployee;
 import cn.edu.fudan.ss.dao.Dao;
+import cn.edu.fudan.ss.log.FileLogFactory;
+import cn.edu.fudan.ss.log.Log;
 import cn.edu.fudan.ss.notification.Notify;
 import cn.edu.fudan.ss.notification.impl.EmailNotification;
+import cn.edu.fudan.ss.notification.impl.Notification;
 import cn.edu.fudan.ss.notification.impl.WechatNotification;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,10 +39,15 @@ public class MeetingController {
 
     private final static Notify emailNotification;
     private final static Notify wechatNotification;
+    private final static Log log;
+    private final static Dao dao;
 
     static {
-        emailNotification = new EmailNotification();
-        wechatNotification = new WechatNotification();
+        emailNotification = new EmailNotification(new Notification());
+        wechatNotification = new WechatNotification(new Notification());
+        dao = Dao.getInstance();
+        FileLogFactory factory = new FileLogFactory();
+        log = factory.Create();
     }
 
     public Notify getEmailNotification(){
@@ -88,7 +96,7 @@ public class MeetingController {
             if (!mustAttend[i])
                 continue;
             String sql = "select * from meeting_employee where employee='" + employees[i] + "' and attend='1'";
-            List<MeetingEmployee> meetingEmployees = Dao.queryMeetingEmployee(sql);
+            List<MeetingEmployee> meetingEmployees = dao.queryMeetingEmployee(sql);
             for (int j = 0; j < meetingEmployees.size(); j++) {
                 timeLine[i][j][0] = meetingEmployees.get(j).start;
                 timeLine[i][j][1] = meetingEmployees.get(j).end;
@@ -161,7 +169,7 @@ public class MeetingController {
     public boolean checkRoomAvailable(int roomId, int start, int end) throws SQLException {
         String sqlQuery = "select * from meeting_room where roomId='" + roomId + "' and ((start <='" + start
                 + "' and end>='" + start + "') or (start<='" + end + "' and start>='" + start + "'))";
-        if (Dao.queryRecordsCount(sqlQuery) > 0)
+        if (dao.queryRecordsCount(sqlQuery) > 0)
             return false;
         return true;
     }
@@ -197,7 +205,7 @@ public class MeetingController {
             String sqlQuery = "select * from employee where name='" + employees[k] + "'";
             Employee employee;
             try {
-                employee = Dao.findEmployee(sqlQuery);
+                employee = dao.findEmployee(sqlQuery);
                 emailNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
                 wechatNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
             } catch (SQLException e) {

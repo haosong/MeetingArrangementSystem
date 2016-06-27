@@ -7,6 +7,6 @@ import java.util.Date;
  * Created by ddz on 16/6/25.
  */
 public abstract class Log {
-    abstract void log(String content);
-    abstract void log(String content, Date date);
+    public abstract void log(String content);
+    public abstract void log(String content, Date date);
 }
