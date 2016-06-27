@@ -14,7 +14,8 @@ public class FileLogFactory extends LogFactory {
     }
 
     public FileLogFactory(){
-        this(new Date().toString() + ".log");
+//        this(new Date().toString() + ".log");
+        this(System.currentTimeMillis() + ".log");
     }
 
 
