@@ -4,11 +4,8 @@ import cn.edu.fudan.ss.bean.Employee;
 import cn.edu.fudan.ss.bean.Meeting;
 import cn.edu.fudan.ss.bean.MeetingEmployee;
 import cn.edu.fudan.ss.dao.Dao;
-import cn.edu.fudan.ss.log.FileLogFactory;
-import cn.edu.fudan.ss.log.Log;
 import cn.edu.fudan.ss.notification.Notify;
 import cn.edu.fudan.ss.notification.impl.EmailNotification;
-import cn.edu.fudan.ss.notification.impl.Notification;
 import cn.edu.fudan.ss.notification.impl.WechatNotification;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,20 +31,29 @@ import java.util.List;
 @Path("meeting")
 public class MeetingController {
 
+    public Dao dao = null;
+
     private final static int TOTAL_ROOMS = 1 << 8;
     private final static int TOTAL_MEETINGS = 1 << 8;
 
     private final static Notify emailNotification;
     private final static Notify wechatNotification;
-    private final static Log log;
-    private final static Dao dao;
+
+    private int createFlag = 0;
+
+    private boolean createMeeting;
 
     static {
-        emailNotification = new EmailNotification(new Notification());
-        wechatNotification = new WechatNotification(new Notification());
-        dao = Dao.getInstance();
-        FileLogFactory factory = new FileLogFactory();
-        log = factory.Create();
+        emailNotification = new EmailNotification();
+        wechatNotification = new WechatNotification();
+    }
+
+    public MeetingController(){
+        dao = Dao.getIntance();
+    }
+
+    public int getCreateFlag(){
+        return createFlag;
     }
 
     public Notify getEmailNotification(){
@@ -63,15 +69,15 @@ public class MeetingController {
     @Produces({MediaType.APPLICATION_JSON})
     public String create(@Context HttpServletRequest httpServletRequest,
                          @QueryParam("sponsor") String sponsor,
-                         @QueryParam("subject") String title,
-                         @QueryParam("names") String employeeList,
+                         @QueryParam("title") String title,
+                         @QueryParam("employees") String employeeList,
                          @QueryParam("attend") String attend,
-                         @QueryParam("date") String startTime,
+                         @QueryParam("start") String startTime,
                          @QueryParam("content") String content,
-                         @QueryParam("time") int duration) throws JSONException, ParseException, SQLException {
+                         @QueryParam("duration") int duration) throws JSONException, ParseException, SQLException {
         Date date = new Date(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
         Time time = new Time(new SimpleDateFormat("MM/dd/yyyy HH:mm").parse(startTime.substring(0, 16)).getTime());
-        final String[] employees = employeeList.split(",");
+        String[] employees = employeeList.split(",");
         String[] attends = attend.split(",");
         boolean[] mustAttend = new boolean[employees.length];
         for (int i = 0; i < attends.length; i++) {
@@ -82,6 +88,7 @@ public class MeetingController {
             }
         }
 
+        createFlag = 0;
         //System.out.println(employees.length);
 
         int n = mustAttend.length;
@@ -95,20 +102,24 @@ public class MeetingController {
         for (int i = 0; i < n; i++) {
             if (!mustAttend[i])
                 continue;
-            String sql = "select * from meeting_employee where employee='" + employees[i] + "' and attend='1'";
+            String sql = "select * from sslab3.meeting_employee where employee='" + employees[i] + "' and attend='1'";
+
             List<MeetingEmployee> meetingEmployees = dao.queryMeetingEmployee(sql);
+
             for (int j = 0; j < meetingEmployees.size(); j++) {
                 timeLine[i][j][0] = meetingEmployees.get(j).start;
                 timeLine[i][j][1] = meetingEmployees.get(j).end;
             }
         }
+
         int start = getTime(time);
         int end = getTime(date) + duration;
         JSONObject response = new JSONObject();
         if (checkEmployeeAvailable(timeLine, n, m, start, end)) {
             for (int i = 1; i < TOTAL_ROOMS; i++) {
                 if (checkRoomAvailable(i, start, end)) {
-                    final Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
+                    createFlag = 1;
+                    Meeting meeting = new Meeting(title, i, sponsor, content, new Timestamp(time.getTime()),
                             duration, employees, mustAttend);
                     meeting.setAttend(attend);
                     meeting.setEmployeeList(employeeList);
@@ -124,6 +135,7 @@ public class MeetingController {
                 }
             }
         }
+        createFlag = -1;
         int k = 0;
         List<Meeting> availableMeetings = new ArrayList<Meeting>();
         for (int i = 10; ;i += 10) {
@@ -166,10 +178,32 @@ public class MeetingController {
         return response.toString();
     }
 
+    @GET
+    @Path("/search")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String search(@Context HttpServletRequest httpServletRequest,
+                       @QueryParam("name") String employee) throws SQLException, ParseException, JSONException {
+        String sql = "select * from sslab3.meeting_employee where employee='" + employee + "'";
+        List<MeetingEmployee> meetingEmployeeList = dao.queryMeetingEmployee(sql);
+        JSONObject response = new JSONObject();
+        JSONArray meetings = new JSONArray();
+        for (MeetingEmployee meetingEmployee: meetingEmployeeList) {
+            sql = "select * from sslab3.meeting where id='" + meetingEmployee.getMeetingId() + "'";
+            List<Meeting> meetingList = dao.getMeetings(sql);
+            for (Meeting meeting: meetingList) {
+                meetings.put(meeting.toJSONObject());
+            }
+        }
+        response.put("name", employee);
+        response.put("meeting", meetings);
+        return response.toString();
+    }
+
     public boolean checkRoomAvailable(int roomId, int start, int end) throws SQLException {
         String sqlQuery = "select * from meeting_room where roomId='" + roomId + "' and ((start <='" + start
                 + "' and end>='" + start + "') or (start<='" + end + "' and start>='" + start + "'))";
-        if (dao.queryRecordsCount(sqlQuery) > 0)
+        int count = dao.queryRecordsCount(sqlQuery);
+        if ( count > 0)
             return false;
         return true;
     }
@@ -200,12 +234,14 @@ public class MeetingController {
         return (int) (date.getTime() / 1000L / 60L);
     }
 
+    public Employee employee;
     public void notifyEmployee(final String[] employees, final Meeting meeting) {
         for (int k = 0; k < employees.length; k++) {
             String sqlQuery = "select * from employee where name='" + employees[k] + "'";
-            Employee employee;
+
             try {
                 employee = dao.findEmployee(sqlQuery);
+                System.out.println(employee.getName());
                 emailNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
                 wechatNotification.notify(employee, meeting, meeting.getEmployeeLevel(k));
             } catch (SQLException e) {

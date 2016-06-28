@@ -1,9 +1,12 @@
 package cn.edu.fudan.ss.dao;
 
 import cn.edu.fudan.ss.bean.Employee;
+import cn.edu.fudan.ss.bean.Meeting;
 import cn.edu.fudan.ss.bean.MeetingEmployee;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +15,17 @@ public class Dao {
     private final static String driver = "com.mysql.jdbc.Driver";
     private final static String url = "jdbc:mysql://10.131.226.239:3306/sslab3?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false";
 
-    private final static  String dbUsername = "root";
-    private final static  String dbPassword = "123456";
+    private final static String dbUsername = "root";
+    private final static String dbPassword = "123456";
 
-    private static Dao dao;
+    private static Dao dao = null;
+
+    public static Dao getIntance(){
+        if (dao == null){
+            dao = new Dao();
+        }
+        return dao;
+    }
 
     static {
         try {
@@ -27,21 +37,6 @@ public class Dao {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    private Dao(){
-
-    }
-
-    public static Dao getInstance(){
-        if (dao == null){
-            synchronized (Dao.class){
-                if (dao == null){
-                    dao = new Dao();
-                }
-            }
-        }
-        return dao;
     }
 
     public  List<MeetingEmployee> queryMeetingEmployee(String sql) throws SQLException {
@@ -74,7 +69,7 @@ public class Dao {
     }
 
 
-    public  void insert(String sql) throws SQLException {
+    public static void insert(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         statement.executeUpdate(sql);
@@ -82,7 +77,7 @@ public class Dao {
         connection.close();
     }
 
-    public  int findMeetingId(String sql) throws SQLException {
+    public static int findMeetingId(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);
@@ -95,7 +90,7 @@ public class Dao {
         return 0;
     }
 
-    public  Employee findEmployee(String sql) throws SQLException {
+    public static Employee findEmployee(String sql) throws SQLException {
         Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
         Statement statement = connection.createStatement();
         ResultSet results = statement.executeQuery(sql);
@@ -107,5 +102,21 @@ public class Dao {
         connection.close();
         results.close();
         return null;
+    }
+
+    public List<Meeting> getMeetings(String sql) throws SQLException, ParseException {
+        Connection connection = DriverManager.getConnection(url, dbUsername, dbPassword);
+        Statement statement = connection.createStatement();
+        ResultSet results = statement.executeQuery(sql);
+        List<Meeting> meetings = new ArrayList<Meeting>();
+        while (results.next()) {
+            meetings.add(new Meeting(results.getString("title"), results.getInt("roomId"), "",
+                    results.getString("content"), new Timestamp(new SimpleDateFormat("MM-dd-yyyy HH:mm").parse(results.getString("start").substring(0, 16)).getTime()),
+                    results.getInt("duration"), new String[0], new boolean[0]));
+        }
+        statement.close();
+        connection.close();
+        results.close();
+        return meetings;
     }
 }
