@@ -16,6 +16,10 @@ public class WechatNotification extends Notification {
         return flag;
     }
 
+    public WechatNotification(){
+
+    }
+
     public WechatNotification(Notification notification){
         this.notification = notification;
 

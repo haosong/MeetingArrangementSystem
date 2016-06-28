@@ -10,7 +10,7 @@ var app = angular.module('SELab3', ['ui.router', 'ui.bootstrap', 'ngResource'])
                         templateUrl: 'views/header.html'
                     },
                     'content': {
-                        templateUrl: 'views/login.html'
+                        templateUrl: 'views/home.html'
                     }
                 }
             })
@@ -28,6 +28,15 @@ var app = angular.module('SELab3', ['ui.router', 'ui.bootstrap', 'ngResource'])
                     'content@': {
                         templateUrl: 'views/login.html',
                         controller: 'LoginController'
+                    }
+                }
+            })
+            .state('app.calendar', {
+                url: 'calender',
+                views: {
+                    'content@': {
+                        templateUrl: 'views/calendar.html',
+                        controller: 'CalendarController'
                     }
                 }
             })
@@ -50,7 +59,7 @@ var app = angular.module('SELab3', ['ui.router', 'ui.bootstrap', 'ngResource'])
                 }
             })
         ;
-        $urlRouterProvider.otherwise('login');
+        $urlRouterProvider.otherwise('home');
     });
 
 app.filter('capitalize', function () {

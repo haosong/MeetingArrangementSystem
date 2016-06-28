@@ -20,7 +20,7 @@ public class Dao {
 
     private static Dao dao = null;
 
-    public static Dao getIntance(){
+    public static Dao getInstance(){
         if (dao == null){
             dao = new Dao();
         }

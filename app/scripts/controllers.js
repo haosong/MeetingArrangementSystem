@@ -74,11 +74,11 @@ angular.module('SELab3')
                 console.log('content: ' + $scope.content);
                 $http.get('/rest/meeting/create', {
                     params: {
-                        subject: $scope.subject,
-                        date: date,
+                        title: $scope.subject,
+                        start: date,
                         sponsor: $scope.sponsor,
-                        time: $scope.time,
-                        names: names,
+                        duration: $scope.time,
+                        employees: names,
                         attend: attend,
                         content: $scope.content
                     }
@@ -111,10 +111,10 @@ angular.module('SELab3')
             //console.log(JSON.stringify(selectedMeeting.attend));
             $http.get('/rest/meeting/create', {
                 params: {
-                    subject: selectedMeeting.title,
-                    date: selectedMeeting.start,
-                    time: selectedMeeting.duration,
-                    names: selectedMeeting.names,
+                    title: selectedMeeting.title,
+                    start: selectedMeeting.start,
+                    duration: selectedMeeting.duration,
+                    employees: selectedMeeting.names,
                     sponsor: selectedMeeting.sponsor,
                     attend: selectedMeeting.attend,
                     content: selectedMeeting.content

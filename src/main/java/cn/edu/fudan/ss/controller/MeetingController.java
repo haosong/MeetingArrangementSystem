@@ -49,7 +49,7 @@ public class MeetingController {
     }
 
     public MeetingController(){
-        dao = Dao.getIntance();
+        dao = Dao.getInstance();
     }
 
     public int getCreateFlag(){
@@ -124,9 +124,11 @@ public class MeetingController {
                     meeting.setAttend(attend);
                     meeting.setEmployeeList(employeeList);
                     meeting.insert();
+                    final String[] _employees = employees;
+                    final Meeting _meeting = meeting;
                     new Thread(new Runnable() {
                         public void run() {
-                            notifyEmployee(employees, meeting);
+                            notifyEmployee(_employees, _meeting);
                         }
                     }).start();
                     response.put("status", "0");

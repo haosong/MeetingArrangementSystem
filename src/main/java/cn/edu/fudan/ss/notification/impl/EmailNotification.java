@@ -10,6 +10,9 @@ import java.sql.Timestamp;
 public class EmailNotification extends Notification {
     private Notification notification;
 
+    public EmailNotification(){
+    }
+
     public EmailNotification(Notification notification){
         this.notification = notification;
 

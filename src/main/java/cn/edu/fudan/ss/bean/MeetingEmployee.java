@@ -14,6 +14,10 @@ public class MeetingEmployee {
         this.meetingId = meetingId;
     }
 
+    public int getMeetingId() {
+        return meetingId;
+    }
+
     public JSONObject toJSONObject(){
         JSONObject user = new JSONObject();
         try {

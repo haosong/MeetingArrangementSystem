@@ -41,9 +41,9 @@
                 <tr ng-repeat="meeting in response.meeting">
                     <td>{{$index + 1}}</td>
                     <td>{{meeting.title}}</td>
-                    <td>{{meeting.date}}</td>
-                    <td>{{meeting.time}}</td>
-                    <td>{{meeting.room}}</td>
+                    <td>{{meeting.start}}</td>
+                    <td>{{meeting.duration}}</td>
+                    <td>{{meeting.roomId}}号会议室</td>
                     <td>{{meeting.content}}</td>
                 </tr>
             </tbody>
