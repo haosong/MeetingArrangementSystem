@@ -130,4 +130,27 @@ angular.module('SELab3')
             });
         }
     })
+
+    .controller('CalendarController', function ($scope, $http) {
+        $scope.username = "";
+        $scope.isNetworkError = false;
+        $scope.isShowTable = true;
+        $scope.response = "";
+        $scope.search = function() {
+            $http.get('/rest/meeting/search', {
+                params: {
+                    name: $scope.username
+                }
+            }).success(function (response) {
+                console.log("success");
+                $scope.response = response;
+                $scope.isShowTable = true;
+                $scope.isNetworkError = false;
+            }).error(function (response) {
+                console.log("error");
+                $scope.isShowTable = false;
+                $scope.isNetworkError = true;
+            });
+        }
+    })
 ;
